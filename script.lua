@@ -154,3 +154,63 @@ task.spawn(function()
         task.wait(0.1)
     end
 end)
+local LP = game:GetService("Players").LocalPlayer
+local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
+local AutoFloor = false
+local FloorPart = nil
+local TargetY = 0 -- الارتفاع المستهدف
+
+-- [ 1. وظيفة إنشاء الأرضية ] --
+local function CreateFloor()
+    local p = Instance.new("Part")
+    p.Name = "SafeFloor_Khayal"
+    p.Size = Vector3.new(15, 1, 15)
+    p.Anchored = true
+    p.CanCollide = true
+    p.CanTouch = false 
+    p.Transparency = 0.5
+    p.Material = Enum.Material.ForceField
+    p.Color = Color3.fromRGB(0, 255, 255)
+    return p
+end
+
+-- [ 2. تشغيل/إطفاء بالزر Q ] --
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    -- تم تغيير المفتاح إلى Q
+    if input.KeyCode == Enum.KeyCode.Q then
+        AutoFloor = not AutoFloor
+        
+        local char = LP.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        
+        if AutoFloor and root then
+            -- الرفع 10 أمتار عند التفعيل
+            root.CFrame = root.CFrame * CFrame.new(0, 0, 0)
+            TargetY = root.Position.Y + 0 -- حفظ الارتفاع الجديد
+            
+            if not FloorPart then FloorPart = CreateFloor() end
+            FloorPart.Parent = workspace
+            print("الأرضية: شغال (Q) والرفع 10Y ✅")
+        else
+            if FloorPart then FloorPart.Parent = nil end
+            print("الأرضية: طافي ❌")
+        end
+    end
+end)
+
+-- [ 3. تحريك الأرضية وتثبيت الارتفاع ] --
+RS.Heartbeat:Connect(function()
+    if AutoFloor and FloorPart and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+        local root = LP.Character.HumanoidRootPart
+        -- الحفاظ على الأرضية تحت اللاعب بمسافة آمنة
+        FloorPart.CFrame = CFrame.new(root.Position.X, root.Position.Y - 3.9, root.Position.Z)
+        
+        -- ميزة تثبيت الارتفاع لمنع السقوط أو الارتفاع العشوائي
+        if root.Velocity.Y < 0 then
+            root.Velocity = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
+        end
+    end
+end)

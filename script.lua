@@ -1,4 +1,4 @@
--- [[ Khayal V29 - AGGRESSIVE + AUTO PATH Q ]] --
+-- [[ Khayal V30 - XEON STEAL MERGED - NO RESP]] --
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -10,14 +10,13 @@ local SpeedMode, TargetSpeed = 1, 28
 local FloorPart, TargetPlayer = nil, nil
 local lastJumpTick = 0
 
--- [ 1. إحداثيات المسارات ] --
+-- [ 1. إحداثيات المسارات Q ] --
 local Path1 = {
     {pos = Vector3.new(-474.2, -7.0, 26.3), speed = 54},
     {pos = Vector3.new(-487.4, -4.5, 25.2), speed = 54, holdE = true},
     {pos = Vector3.new(-473.5, -7.0, 25.4), speed = 28},
     {pos = Vector3.new(-473.8, -7.0, 52.1), speed = 28}
 }
-
 local Path2 = {
     {pos = Vector3.new(-474.1, -7.0, 93.6), speed = 54},
     {pos = Vector3.new(-488.0, -4.5, 95.5), speed = 54, holdE = true},
@@ -25,7 +24,7 @@ local Path2 = {
     {pos = Vector3.new(-476.4, -7.0, 72.3), speed = 28}
 }
 
--- [ 2. المحرك الفيزيائي ] --
+-- [ 2. المحرك الفيزيائي للسرعة ] --
 local Attachment = Instance.new("Attachment")
 local LV = Instance.new("LinearVelocity")
 LV.MaxForce = 999999
@@ -37,7 +36,7 @@ LV.RelativeTo = Enum.ActuatorRelativeTo.World
 -- [ 3. الواجهة الرسومية ] --
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 240, 0, 350) -- زدنا الطول للزر الجديد
+Main.Size = UDim2.new(0, 240, 0, 350)
 Main.Position = UDim2.new(0.05, 0, 0.3, 0)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Main.Active, Main.Draggable = true, true
@@ -52,7 +51,7 @@ ApplyRGB(Main)
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Text = "المصمم خياال - V29"
+Title.Text = "المصمم خياال - V30"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 17 
@@ -71,55 +70,20 @@ local function CreateBtn(pos_y, text)
     return b
 end
 
-local BtnR = CreateBtn(55, "E-HACK: OFF (R)")
+local BtnR = CreateBtn(55, "INSTANT STEAL: OFF (R)") -- زر السرقة الجديد
 local BtnT = CreateBtn(100, "Speed: 28 (T)")
 local BtnC = CreateBtn(145, "Follow: OFF (C)")
 local BtnE = CreateBtn(190, "Floor: OFF (E)")
-local BtnQ = CreateBtn(235, "Auto Path: OFF (Q)") -- الزر الجديد
+local BtnQ = CreateBtn(235, "Auto Path: OFF (Q)")
 local BtnK = CreateBtn(280, "Slap: OFF (K)")
 
--- [ 4. وظائف الحركة الآلية ] --
-local function MoveToPoint(targetPos, speed)
-    local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    while (root.Position - targetPos).Magnitude > 2 and IsRunningPath do
-        local dir = (targetPos - root.Position).Unit
-        LV.PlaneVelocity = Vector2.new(dir.X * speed, dir.Z * speed)
-        task.wait()
-    end
-    LV.PlaneVelocity = Vector2.new(0,0)
-end
-
-local function ExecutePath()
-    if IsRunningPath then return end
-    IsRunningPath = true
-    UpdateUI()
-    
-    local root = LP.Character.HumanoidRootPart
-    local dist1 = (root.Position - Path1[1].pos).Magnitude
-    local dist2 = (root.Position - Path2[1].pos).Magnitude
-    local selectedPath = dist1 < dist2 and Path1 or Path2
-    
-    for _, step in ipairs(selectedPath) do
-        if not IsRunningPath then break end
-        MoveToPoint(step.pos, step.speed)
-        if step.holdE and IsRunningPath then
-            VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-            task.wait(0.33)
-            VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-        end
-    end
-    IsRunningPath = false
-    UpdateUI()
-end
-
--- [ 5. منطق الأزرار ] --
+-- [ 4. منطق التبديل ] --
 function UpdateUI()
-    BtnR.Text = EHackActive and "E-HACK: ON ✅ (R)" or "E-HACK: OFF (R)"
+    BtnR.Text = EHackActive and "STEAL: ON ✅ (R)" or "STEAL: OFF (R)"
     BtnT.Text = "Speed: " .. TargetSpeed .. " (T)"
     BtnC.Text = Following and "Follow: ON 🏃 (C)" or "Follow: OFF (C)"
     BtnE.Text = AutoFloor and "Floor: ON ✅ (E)" or "Floor: OFF (E)"
-    BtnQ.Text = IsRunningPath and "Auto Path: ON ⚙️ (Q)" or "Auto Path: OFF (Q)"
+    BtnQ.Text = IsRunningPath and "Path: ON ⚙️ (Q)" or "Path: OFF (Q)"
     BtnK.Text = AutoSlap and "Slap: ON 🔥 (K)" or "Slap: OFF (K)"
 end
 
@@ -145,13 +109,32 @@ local function Toggle(k)
                 FloorPart.Transparency, FloorPart.Material = 0.5, Enum.Material.ForceField
             end
         else if FloorPart then FloorPart:Destroy() FloorPart = nil end end
-    elseif k == "Q" then if IsRunningPath then IsRunningPath = false else task.spawn(ExecutePath) end
+    elseif k == "Q" then if IsRunningPath then IsRunningPath = false else task.spawn(function()
+            IsRunningPath = true
+            UpdateUI()
+            local root = LP.Character.HumanoidRootPart
+            local selectedPath = (root.Position - Path1[1].pos).Magnitude < (root.Position - Path2[1].pos).Magnitude and Path1 or Path2
+            for _, step in ipairs(selectedPath) do
+                if not IsRunningPath then break end
+                while (root.Position - step.pos).Magnitude > 2 and IsRunningPath do
+                    local dir = (step.pos - root.Position).Unit
+                    LV.PlaneVelocity = Vector2.new(dir.X * step.speed, dir.Z * step.speed)
+                    task.wait()
+                end
+                if step.holdE and IsRunningPath then
+                    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                    task.wait(0.33)
+                    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end
+            end
+            IsRunningPath = false
+            UpdateUI()
+        end) end
     elseif k == "K" then AutoSlap = not AutoSlap
     end
     UpdateUI()
 end
 
--- ربط الأزرار
 BtnR.Activated:Connect(function() Toggle("R") end)
 BtnT.Activated:Connect(function() Toggle("T") end)
 BtnC.Activated:Connect(function() Toggle("C") end)
@@ -160,7 +143,7 @@ BtnQ.Activated:Connect(function() Toggle("Q") end)
 BtnK.Activated:Connect(function() Toggle("K") end)
 UIS.InputBegan:Connect(function(input, gpe) if not gpe then Toggle(input.KeyCode.Name) end end)
 
--- [ 6. المحرك الرئيسي ] --
+-- [ 5. المحرك الرئيسي ] --
 RS.Heartbeat:Connect(function()
     local char = LP.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -177,10 +160,7 @@ RS.Heartbeat:Connect(function()
                     hum:MoveTo(tRoot.Position)
                     local dir = (tRoot.Position - root.Position).Unit
                     moveVec = Vector3.new(dir.X, 0, dir.Z)
-                    if tRoot.Position.Y > root.Position.Y + 4 then
-                        if not AutoFloor then Toggle("E") end
-                        if tick() - lastJumpTick > 0.6 then hum.Jump = true lastJumpTick = tick() end
-                    end
+                    if tRoot.Position.Y > root.Position.Y + 4 then hum.Jump = true end
                 end
             end
             LV.PlaneVelocity = Vector2.new(moveVec.X * TargetSpeed, moveVec.Z * TargetSpeed)
@@ -192,25 +172,19 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
+-- حلقة Xeon Steal المدمجة (توقيت 0.28)
 task.spawn(function()
-    while task.wait(0.29) do
+    while task.wait(0.28) do
+        if EHackActive then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ProximityPrompt") then v.HoldDuration = 0 end
+            end
+        end
         if AutoSlap and LP.Character then
-            local target = (function()
-                local d, p = math.huge, nil
-                for _, v in pairs(game.Players:GetPlayers()) do
-                    if v ~= LP and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                        local dist = (v.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).Magnitude
-                        if dist < d then d = dist p = v end
-                    end
-                end
-                return p
-            end)()
+            local target = GetClosest()
             if target and target.Character and (target.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).Magnitude < 10 then
                 LP.Character:FindFirstChildOfClass("Tool"):Activate()
             end
-        end
-        if EHackActive then
-            for _, v in pairs(workspace:GetDescendants()) do if v:IsA("ProximityPrompt") then v.HoldDuration = 0 end end
         end
     end
 end)

@@ -5,7 +5,7 @@ local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 local EHackActive, AutoSlap, AutoFloor, Following = false, false, false, false
-local SpeedMode, TargetSpeed = 1, 29
+local SpeedMode, TargetSpeed = 1, 28
 local FloorPart, TargetPlayer = nil, nil
 local lastJumpTick = 0
 
@@ -98,7 +98,7 @@ end
 local function Toggle(k)
     if k == "R" then EHackActive = not EHackActive
     elseif k == "T" then 
-        if SpeedMode == 1 then SpeedMode = 2 TargetSpeed = 54 else SpeedMode = 1 TargetSpeed = 29 end
+        if SpeedMode == 1 then SpeedMode = 2 TargetSpeed = 54 else SpeedMode = 1 TargetSpeed = 28 end
     elseif k == "C" then 
         Following = not Following
         TargetPlayer = Following and GetClosest() or nil

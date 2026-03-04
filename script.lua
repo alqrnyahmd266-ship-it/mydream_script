@@ -70,14 +70,13 @@ local function CreateBtn(pos_y, text)
     return b
 end
 
-local BtnR = CreateBtn(55, "INSTANT STEAL: OFF (R)") -- زر السرقة الجديد
+local BtnR = CreateBtn(55, "INSTANT STEAL: OFF (R)") 
 local BtnT = CreateBtn(100, "Speed: 28 (T)")
 local BtnC = CreateBtn(145, "Follow: OFF (C)")
 local BtnE = CreateBtn(190, "Floor: OFF (E)")
 local BtnQ = CreateBtn(235, "Auto Path: OFF (Q)")
 local BtnK = CreateBtn(280, "Slap: OFF (K)")
 
--- [ 4. منطق التبديل ] --
 function UpdateUI()
     BtnR.Text = EHackActive and "STEAL: ON ✅ (R)" or "STEAL: OFF (R)"
     BtnT.Text = "Speed: " .. TargetSpeed .. " (T)"
@@ -114,17 +113,22 @@ local function Toggle(k)
             UpdateUI()
             local root = LP.Character.HumanoidRootPart
             local selectedPath = (root.Position - Path1[1].pos).Magnitude < (root.Position - Path2[1].pos).Magnitude and Path1 or Path2
-            for _, step in ipairs(selectedPath) do
+            for i, step in ipairs(selectedPath) do
                 if not IsRunningPath then break end
                 while (root.Position - step.pos).Magnitude > 2 and IsRunningPath do
                     local dir = (step.pos - root.Position).Unit
                     LV.PlaneVelocity = Vector2.new(dir.X * step.speed, dir.Z * step.speed)
                     task.wait()
                 end
+                
+                -- التعديل: يوقف يسرق ثلث ثانية ثم يكمل الباقي
                 if step.holdE and IsRunningPath then
+                    LV.PlaneVelocity = Vector2.new(0, 0)
+                    root.Velocity = Vector3.new(0, 0, 0)
                     VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                    task.wait(0.33)
+                    task.wait(0.33) -- ثلث ثانية
                     VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                    task.wait(0.1)
                 end
             end
             IsRunningPath = false
@@ -143,7 +147,6 @@ BtnQ.Activated:Connect(function() Toggle("Q") end)
 BtnK.Activated:Connect(function() Toggle("K") end)
 UIS.InputBegan:Connect(function(input, gpe) if not gpe then Toggle(input.KeyCode.Name) end end)
 
--- [ 5. المحرك الرئيسي ] --
 RS.Heartbeat:Connect(function()
     local char = LP.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -172,7 +175,6 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
--- حلقة Xeon Steal المدمجة (توقيت 0.28)
 task.spawn(function()
     while task.wait(0.28) do
         if EHackActive then
@@ -181,10 +183,8 @@ task.spawn(function()
             end
         end
         if AutoSlap and LP.Character then
-            local target = GetClosest()
-            if target and target.Character and (target.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).Magnitude < 10 then
-                LP.Character:FindFirstChildOfClass("Tool"):Activate()
-            end
+            local tool = LP.Character:FindFirstChildOfClass("Tool")
+            if tool then tool:Activate() end
         end
     end
 end)

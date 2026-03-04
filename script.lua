@@ -166,7 +166,7 @@ RS.Heartbeat:Connect(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.275) do
+    while task.wait(0.1) do
         if AutoSlap and LP.Character then
             local target = GetClosest()
             if target and target.Character and (target.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).Magnitude < 10 then

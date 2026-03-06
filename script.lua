@@ -1,4 +1,14 @@
--- [[ Khayal V30 - XEON STEAL MERGED - NO RESP]] --
+if not game then 
+    -- إذا تم فتح الرابط في متصفح (وليس داخل اللعبة) سيفعل هذا:
+    print("Go to my website!") 
+    -- ملاحظة: الروابط المباشرة لا تحول المتصفح تلقائياً، 
+    -- لكن يمكننا جعل الكود "يخرب" لو فُتح خارج اللعبة.
+    return 
+end
+
+-- كودك الأصلي يبدأ من هنا:
+print("Welcome to My Dream Script!")
+
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")

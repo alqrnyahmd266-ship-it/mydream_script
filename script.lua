@@ -1,13 +1,37 @@
-if not game then 
-    -- إذا تم فتح الرابط في متصفح (وليس داخل اللعبة) سيفعل هذا:
-    print("Go to my website!") 
-    -- ملاحظة: الروابط المباشرة لا تحول المتصفح تلقائياً، 
-    -- لكن يمكننا جعل الكود "يخرب" لو فُتح خارج اللعبة.
-    return 
+-- قائمة الحسابات المسموح لها (ضع الأسماء هنا)
+local AllowedUsers = {"", "", ""} 
+
+local Player = game:GetService("Players").LocalPlayer
+local isAllowed = false
+
+-- التحقق من اسم اللاعب
+for _, Name in pairs(AllowedUsers) do
+    if Player.Name == Name then
+        isAllowed = true
+        break
+    end
 end
 
--- كودك الأصلي يبدأ من هنا:
-print("Welcome to My Dream Script!")
+-- إذا لم يكن اللاعب مسموحاً له
+if not isAllowed then
+    -- إنشاء واجهة رسالة التحذير (خط كبير)
+    local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local TextLabel = Instance.new("TextLabel", ScreenGui)
+    
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.BackgroundColor3 = Color3.new(0, 0, 0) -- خلفية سوداء
+    TextLabel.TextColor3 = Color3.new(1, 0, 0) -- خط أحمر
+    TextLabel.TextScaled = true -- الخط يكون كبير جداً
+    TextLabel.Font = Enum.Font.SourceSansBold
+    TextLabel.Text = "عذراً، ليس لديك صلاحية!\nلو تبي الصلاحية كلم 5edf في الديسكورد"
+    
+    task.wait(5) -- تظهر الرسالة 5 ثواني ثم يطرد اللاعب
+    Player:Kick("Contact 5edf on Discord for access.")
+    return
+end
+
+-- كودك الأصلي يبدأ من هنا (ضعه تحت هذا السطر)
+print("تم تفعيل السكربت بنجاح، أهلاً بك يا " .. Player.Name)
 
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")

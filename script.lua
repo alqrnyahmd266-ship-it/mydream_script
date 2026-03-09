@@ -1,5 +1,5 @@
 -- قائمة الحسابات المسموح لها (ضع الأسماء هنا)
-local AllowedUsers = {"aziz21225", "gokkeygame_t", "Ahmoooood209"} 
+local AllowedUsers = {"aziz21225", "gokkeygame_t", "Ahmood209"} 
 
 local Player = game:GetService("Players").LocalPlayer
 local isAllowed = false

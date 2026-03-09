@@ -222,3 +222,61 @@ task.spawn(function()
         end
     end
 end)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local isSpinning = false
+local spinPower = 35 -- السرعة اللي طلبتها (35)
+
+-- إنشاء الواجهة (UI) في الزاوية العلوية اليمنى
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+local toggleBtn = Instance.new("TextButton", screenGui)
+toggleBtn.Size = UDim2.new(0, 120, 0, 40)
+toggleBtn.Position = UDim2.new(1, -130, 0, 10)
+toggleBtn.Text = "تفعيل الدوران"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+toggleBtn.Font = Enum.Font.SourceSansBold
+toggleBtn.TextSize = 16
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
+
+local angularVelocity = nil
+
+-- وظيفة التحكم في الدوران الفيزيائي مع الثبات
+toggleBtn.MouseButton1Click:Connect(function()
+    isSpinning = not isSpinning
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    
+    if isSpinning and hrp then
+        toggleBtn.Text = "إيقاف الدوران"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+        
+        -- إعداد أداة الدوران لضمان عدم السقوط
+        angularVelocity = Instance.new("AngularVelocity")
+        angularVelocity.Attachment0 = hrp:FindFirstChildOfClass("Attachment") or Instance.new("Attachment", hrp)
+        
+        -- أهم نقطة للثبات: نحدد القوة في المحور العمودي فقط
+        angularVelocity.MaxTorque = math.huge
+        angularVelocity.AngularVelocity = Vector3.new(0, spinPower, 0) 
+        
+        -- تفعيل نظام التوازن لمنع الانقلاب أثناء المشي
+        angularVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+        
+        angularVelocity.Parent = hrp
+    else
+        toggleBtn.Text = "تفعيل الدوران"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        if angularVelocity then
+            angularVelocity:Destroy()
+            angularVelocity = nil
+        end
+    end
+end)
+
+-- تصفير السكربت عند الموت لضمان النظافة
+player.CharacterAdded:Connect(function()
+    isSpinning = false
+    toggleBtn.Text = "تفعيل الدوران"
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+end)
